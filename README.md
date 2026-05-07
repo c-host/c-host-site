@@ -1,1 +1,1 @@
-Personal website for c-host.
+Website for c-host.
