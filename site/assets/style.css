@@ -59,15 +59,7 @@ header {
 .footer-bar {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: 12px;
-}
-
-.footer-icon {
-  display: inline-block;
-  color: var(--muted);
-  line-height: 1.1;
-  padding: 0;
 }
 
 .footer-icon:hover {
@@ -190,6 +182,127 @@ p {
 
 .links a {
   margin-right: 10px;
+}
+
+.blog-lede {
+  margin: 0 0 14px;
+}
+
+.blog-list time {
+  color: var(--muted);
+}
+
+.blog-meta {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+.blog-post h1 {
+  margin-bottom: 14px;
+}
+
+.blog-body {
+  margin-top: 8px;
+}
+
+.blog-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.blog-body>*:first-child {
+  margin-top: 0;
+}
+
+.blog-body p,
+.blog-body ul,
+.blog-body ol,
+.blog-body blockquote,
+.blog-body pre {
+  margin: 0 0 14px;
+}
+
+.blog-body blockquote {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--bg) 94%, var(--accent));
+  color: color-mix(in srgb, var(--fg) 92%, var(--muted));
+}
+
+.blog-body blockquote>*:last-child {
+  margin-bottom: 0;
+}
+
+.wip-callout {
+  margin: 0 0 16px;
+  color: var(--accent);
+}
+
+.wip-callout b {
+  color: var(--accent);
+}
+
+.wip-inline {
+  color: var(--muted);
+}
+
+.blog-body figure {
+  margin: 0 0 14px;
+}
+
+.blog-body figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+}
+
+.blog-body figcaption {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.95em;
+  text-align: center;
+}
+
+.footnotes {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.footnotes ol {
+  padding-left: 18px;
+}
+
+.footnotes a {
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.12em;
+}
+
+.blog-body code {
+  font-size: 0.95em;
+}
+
+.blog-body pre {
+  overflow-x: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 94%, var(--muted));
+}
+
+.blog-embed {
+  margin: 14px 0;
+}
+
+.blog-embed iframe {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  display: block;
 }
 
 footer {
