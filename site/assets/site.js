@@ -88,6 +88,7 @@
         }
         for (const other of items) collapse(other);
         expand(item);
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
       });
     }
   }
