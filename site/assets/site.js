@@ -166,6 +166,110 @@
     closeButton.hidden = true;
   }
 
+  // Inline info links: hover/focus to show extra text, contained within `.wrap`.
+  // Usage:
+  //   <span class="info-link" tabindex="0" data-tooltip="...">Some text</span>
+  // Optional external link icon:
+  //   add `data-ext-href="https://..."` anda small icon link will be injected next to the text.
+  const INFO_LINK_SELECTOR = ".info-link[data-tooltip]";
+  let infoTooltipEl = null;
+  let activeInfoLink = null;
+
+  const ensureInfoTooltip = (wrapEl) => {
+    if (infoTooltipEl && infoTooltipEl.closest(".wrap") === wrapEl) return infoTooltipEl;
+    if (infoTooltipEl) infoTooltipEl.remove();
+    infoTooltipEl = document.createElement("div");
+    infoTooltipEl.className = "info-tooltip";
+    infoTooltipEl.hidden = true;
+    wrapEl.appendChild(infoTooltipEl);
+    return infoTooltipEl;
+  };
+
+  const hideInfoTooltip = () => {
+    if (!infoTooltipEl) return;
+    infoTooltipEl.hidden = true;
+    infoTooltipEl.textContent = "";
+    activeInfoLink = null;
+  };
+
+  const showInfoTooltip = (linkEl) => {
+    const wrapEl = linkEl.closest(".wrap") || document.body;
+    if (!(wrapEl instanceof HTMLElement)) return;
+    const tooltip = ensureInfoTooltip(wrapEl);
+    const text = linkEl.getAttribute("data-tooltip") || "";
+    if (!text) return;
+
+    activeInfoLink = linkEl;
+    tooltip.textContent = text;
+    tooltip.hidden = false;
+
+    // Measure and position within wrap: prefer above, else below.
+    tooltip.style.visibility = "hidden";
+    tooltip.style.top = "0px";
+    const wrapRect = wrapEl.getBoundingClientRect();
+    const linkRect = linkEl.getBoundingClientRect();
+    const tipH = tooltip.offsetHeight || 0;
+    // Adjust for the padding of the tooltip itself
+    const gap = 10;
+
+    let top = linkRect.top - wrapRect.top - tipH - gap;
+    if (top < 6) top = linkRect.bottom - wrapRect.top + gap;
+    tooltip.style.top = `${Math.max(6, top)}px`;
+    tooltip.style.visibility = "";
+  };
+
+  const ensureInfoExternalIcons = () => {
+    for (const linkEl of document.querySelectorAll(`${INFO_LINK_SELECTOR}[data-ext-href]`)) {
+      if (linkEl.dataset.infoExtInjected === "1") continue;
+      const href = linkEl.getAttribute("data-ext-href");
+      if (!href) continue;
+
+      const a = document.createElement("a");
+      a.className = "info-ext";
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noreferrer";
+      a.setAttribute("aria-label", "Open external link (opens in new tab)");
+      a.setAttribute("title", "Open external link");
+      // Icon is provided via CSS mask; keep markup minimal.
+
+      linkEl.insertAdjacentElement("afterend", a);
+      linkEl.dataset.infoExtInjected = "1";
+    }
+  };
+
+  ensureInfoExternalIcons();
+
+  document.addEventListener("mouseover", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+    const linkEl = target.closest(INFO_LINK_SELECTOR);
+    if (linkEl) showInfoTooltip(linkEl);
+  });
+
+  document.addEventListener("focusin", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+    const linkEl = target.closest(INFO_LINK_SELECTOR);
+    if (linkEl) showInfoTooltip(linkEl);
+  });
+
+  document.addEventListener("mouseout", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || !activeInfoLink) return;
+    if (target === activeInfoLink || target.closest(INFO_LINK_SELECTOR) === activeInfoLink) hideInfoTooltip();
+  });
+
+  document.addEventListener("focusout", () => hideInfoTooltip());
+
+  window.addEventListener("scroll", () => {
+    if (activeInfoLink) showInfoTooltip(activeInfoLink);
+  }, { passive: true });
+
+  window.addEventListener("resize", () => {
+    if (activeInfoLink) showInfoTooltip(activeInfoLink);
+  });
+
   // "Special links": add class `special-link` and data fields.
   // Required: href
   // Optional: data-passcode (copy button), data-special-title, data-special-hint, data-special-field-*
@@ -203,15 +307,26 @@
         <h2 class="special-link-modal__title" id="specialLinkTitle"></h2>
         <p class="special-link-modal__hint small" id="specialLinkHint"></p>
         <div class="special-link-modal__kv" id="specialLinkKv"></div>
-        <div class="special-link-modal__actions">
-          <button class="special-link-modal__btn" type="button" data-special-link-close>Close</button>
-        </div>
       </div>`;
     document.body.appendChild(modal);
     return modal;
   };
 
   let lastFocusedSpecial = null;
+  let specialCloseButton = null;
+
+  const ensureSpecialCloseButton = () => {
+    if (specialCloseButton) return specialCloseButton;
+    specialCloseButton = document.createElement("button");
+    specialCloseButton.type = "button";
+    // Reuse the exact close-button pattern from the image lightbox.
+    specialCloseButton.className = "lightbox-close";
+    specialCloseButton.setAttribute("aria-label", "Close");
+    specialCloseButton.textContent = "Close";
+    specialCloseButton.hidden = true;
+    document.body.appendChild(specialCloseButton);
+    return specialCloseButton;
+  };
 
   const copyText = async (text) => {
     if (!text) return false;
@@ -238,6 +353,7 @@
 
   const openSpecialLinkModal = (trigger) => {
     const modal = ensureSpecialLinkModal();
+    const closeBtn = ensureSpecialCloseButton();
     const titleEl = modal.querySelector("#specialLinkTitle");
     const hintEl = modal.querySelector("#specialLinkHint");
     const kvRoot = modal.querySelector("#specialLinkKv");
@@ -301,9 +417,9 @@
     modal.hidden = false;
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("lightbox-open");
-
-    const focusEl = (copyBtn || modal.querySelector("[data-special-link-close]"));
-    if (focusEl instanceof HTMLElement) focusEl.focus();
+    closeBtn.hidden = false;
+    closeBtn.onclick = closeSpecialLinkModal;
+    closeBtn.focus();
   };
 
   const closeSpecialLinkModal = () => {
@@ -312,6 +428,9 @@
     modal.hidden = true;
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("lightbox-open");
+    const closeBtn = ensureSpecialCloseButton();
+    closeBtn.hidden = true;
+    closeBtn.onclick = null;
     if (lastFocusedSpecial) lastFocusedSpecial.focus();
     lastFocusedSpecial = null;
   };
