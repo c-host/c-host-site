@@ -583,6 +583,108 @@ body.lightbox-open {
   overflow: hidden;
 }
 
+/* "Special link" modal (links that need extra metadata like passcodes). */
+.special-link-modal[hidden] {
+  display: none !important;
+}
+
+.special-link-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.special-link-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  opacity: 0.75;
+}
+
+.special-link-modal__panel {
+  position: relative;
+  width: min(560px, 100%);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: inherit;
+  padding: 16px;
+  box-shadow: 0 16px 70px rgba(0, 0, 0, 0.45);
+}
+
+.special-link-modal__title {
+  margin: 0 0 6px 0;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.special-link-modal__hint {
+  margin: 0 0 12px 0;
+  opacity: 0.85;
+}
+
+.special-link-modal__kv {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 12px 0;
+}
+
+.special-link-modal__row {
+  display: grid;
+  gap: 6px;
+}
+
+.special-link-modal__label {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.special-link-modal__value {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 94%, var(--muted));
+}
+
+.special-link-modal__value code,
+.special-link-modal__value a,
+.special-link-modal__value span {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.special-link-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.special-link-modal__btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: inherit;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+
+.special-link-modal__btn:hover {
+  text-decoration: underline;
+}
+
 /* When detail is injected under a selected item on mobile. */
 .project-detail.inline {
   margin: 8px 0 10px;

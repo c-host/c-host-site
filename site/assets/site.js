@@ -165,5 +165,177 @@
     document.body.appendChild(closeButton);
     closeButton.hidden = true;
   }
+
+  // "Special links": add class `special-link` and data fields.
+  // Required: href
+  // Optional: data-passcode (copy button), data-special-title, data-special-hint, data-special-field-*
+  const SPECIAL_LINK_SELECTOR = "a.special-link";
+  const SPECIAL_FIELD_PREFIX = "data-special-field-";
+  const SPECIAL_MODAL_ID = "specialLinkModal";
+  const DEFAULT_SPECIAL_TITLE = "This link requires additional information";
+  const DEFAULT_SPECIAL_HINT = "Copy the information and then open the link";
+
+  const escapeHtml = (s) =>
+    String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  const prettyLabel = (raw) =>
+    String(raw || "")
+      .replace(/[-_]+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (m) => m.toUpperCase()) || "Field";
+
+  const ensureSpecialLinkModal = () => {
+    let modal = document.getElementById(SPECIAL_MODAL_ID);
+    if (modal) return modal;
+    modal = document.createElement("div");
+    modal.id = SPECIAL_MODAL_ID;
+    modal.className = "special-link-modal";
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    modal.innerHTML = `
+      <div class="special-link-modal__backdrop" data-special-link-close></div>
+      <div class="special-link-modal__panel" role="dialog" aria-modal="true" aria-labelledby="specialLinkTitle">
+        <h2 class="special-link-modal__title" id="specialLinkTitle"></h2>
+        <p class="special-link-modal__hint small" id="specialLinkHint"></p>
+        <div class="special-link-modal__kv" id="specialLinkKv"></div>
+        <div class="special-link-modal__actions">
+          <button class="special-link-modal__btn" type="button" data-special-link-close>Close</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    return modal;
+  };
+
+  let lastFocusedSpecial = null;
+
+  const copyText = async (text) => {
+    if (!text) return false;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        return ok;
+      } catch {
+        return false;
+      }
+    }
+  };
+
+  const openSpecialLinkModal = (trigger) => {
+    const modal = ensureSpecialLinkModal();
+    const titleEl = modal.querySelector("#specialLinkTitle");
+    const hintEl = modal.querySelector("#specialLinkHint");
+    const kvRoot = modal.querySelector("#specialLinkKv");
+    if (!titleEl || !hintEl || !kvRoot) return;
+
+    lastFocusedSpecial = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    const url = trigger.getAttribute("href") || "";
+    const title = trigger.getAttribute("data-special-title") || DEFAULT_SPECIAL_TITLE;
+    const hint = trigger.getAttribute("data-special-hint") || DEFAULT_SPECIAL_HINT;
+    const passcode = trigger.getAttribute("data-passcode") || trigger.getAttribute("data-special-passcode") || "";
+
+    titleEl.textContent = title;
+    hintEl.textContent = hint;
+
+    let rows = `
+      <div class="special-link-modal__row">
+        <div class="special-link-modal__label">Link</div>
+        <div class="special-link-modal__value">
+          <a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(url || "Open link")}</a>
+        </div>
+      </div>`;
+
+    if (passcode) {
+      rows += `
+        <div class="special-link-modal__row">
+          <div class="special-link-modal__label">Passcode</div>
+          <div class="special-link-modal__value">
+            <code id="specialLinkPasscode">${escapeHtml(passcode)}</code>
+            <button class="special-link-modal__btn" type="button" id="specialLinkCopyBtn">Copy</button>
+          </div>
+        </div>`;
+    }
+
+    for (const attr of trigger.attributes) {
+      if (!attr.name.startsWith(SPECIAL_FIELD_PREFIX)) continue;
+      const key = attr.name.slice(SPECIAL_FIELD_PREFIX.length);
+      const value = attr.value;
+      if (!value) continue;
+      rows += `
+        <div class="special-link-modal__row">
+          <div class="special-link-modal__label">${escapeHtml(prettyLabel(key))}</div>
+          <div class="special-link-modal__value"><span>${escapeHtml(value)}</span></div>
+        </div>`;
+    }
+
+    kvRoot.innerHTML = rows;
+
+    const copyBtn = modal.querySelector("#specialLinkCopyBtn");
+    if (copyBtn) {
+      copyBtn.addEventListener(
+        "click",
+        async () => {
+          const ok = await copyText(passcode);
+          copyBtn.textContent = ok ? "Copied" : "Copy failed";
+        },
+        { once: true }
+      );
+    }
+
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lightbox-open");
+
+    const focusEl = (copyBtn || modal.querySelector("[data-special-link-close]"));
+    if (focusEl instanceof HTMLElement) focusEl.focus();
+  };
+
+  const closeSpecialLinkModal = () => {
+    const modal = document.getElementById(SPECIAL_MODAL_ID);
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lightbox-open");
+    if (lastFocusedSpecial) lastFocusedSpecial.focus();
+    lastFocusedSpecial = null;
+  };
+
+  document.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+    const trigger = target.closest(SPECIAL_LINK_SELECTOR);
+    if (trigger) {
+      event.preventDefault();
+      openSpecialLinkModal(trigger);
+      return;
+    }
+    const close = target.closest("[data-special-link-close]");
+    if (close) {
+      event.preventDefault();
+      closeSpecialLinkModal();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    const modal = document.getElementById(SPECIAL_MODAL_ID);
+    if (!modal || modal.hidden) return;
+    if (event.key === "Escape") closeSpecialLinkModal();
+  });
 })();
 

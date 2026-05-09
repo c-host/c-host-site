@@ -4,3 +4,6 @@ Thumbs.db
 # Local tooling
 .vscode/
 
+# Local notes
+content/blog/scratch.md
+
