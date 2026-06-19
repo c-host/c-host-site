@@ -270,6 +270,14 @@
     if (activeInfoLink) showInfoTooltip(activeInfoLink);
   });
 
+  // Close any open `<details class="portfolios">` menu on outside click.
+  document.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    for (const menu of document.querySelectorAll("details.portfolios[open]")) {
+      if (!target || !menu.contains(target)) menu.open = false;
+    }
+  });
+
   // "Special links": add class `special-link` and data fields.
   // Required: href
   // Optional: data-passcode (copy button), data-special-title, data-special-hint, data-special-field-*
