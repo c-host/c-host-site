@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="ka">
+  <title>c-host — წერა</title>
+  <link href="https://c-host.site/blog/ka/feed.xml" rel="self" />
+  <link href="https://c-host.site/blog/ka/" />
+  <id>https://c-host.site/blog/ka/feed.xml</id>
+  <updated>2026-06-29T12:00:00Z</updated>
+  <author><name>c-host</name></author>
+  <entry xml:lang="ka">
+    <title>Xarafontinator — „ხარახურას“ ქართული ანბანის ხატვის ვორქშოპი</title>
+    <link href="https://c-host.site/blog/ka/xarafontinator/" rel="alternate" />
+    <id>https://c-host.site/blog/ka/xarafontinator/</id>
+    <updated>2026-06-29T12:00:00Z</updated>
+    <published>2026-06-29T12:00:00Z</published>
+    <summary>ქართული ანბანის ხატვის ვორქშოპი.</summary>
+    <content type="html"><![CDATA[
+<p>
+  ქართული ანბანის ხატვის ვორქშოპი.
+</p>
+<p><a href="https://c-host.site/blog/ka/xarafontinator/">სრული ჩანაწერის გახსნა</a> გამოსახულებების, ჩართვების და სრული განლაგებისთვის.</p>
+    ]]></content>
+  </entry>
+</feed>

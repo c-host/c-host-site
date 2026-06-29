@@ -61,6 +61,14 @@ header {
   gap: 12px;
 }
 
+.footer-bar--post {
+  width: 100%;
+}
+
+.footer-bar__back-to-top {
+  margin-left: auto;
+}
+
 .footer-icon:hover {
   text-decoration: underline;
 }
@@ -185,7 +193,7 @@ p {
 }
 
 .glyph {
-  width: 2ch;
+  flex: 0 0 auto;
   display: inline-block;
 }
 
@@ -259,8 +267,12 @@ p {
   margin-right: 10px;
 }
 
-.blog-lede {
+.blog-intro {
   margin: 0 0 14px;
+}
+
+.blog-feed {
+  margin: 22px 0 0;
 }
 
 .blog-list time {
@@ -396,18 +408,45 @@ footer {
   top: 24px;
   right: 20px;
   z-index: 20;
+  display: inline-flex;
+  align-items: stretch;
   border: 1px solid var(--border);
   background: var(--bg);
-  color: var(--fg);
+}
+
+.theme-toggle__btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
   font: inherit;
-  line-height: 1;
   font-size: 0.95rem;
+  line-height: 0;
   padding: 6px 8px;
   cursor: pointer;
 }
 
-.theme-toggle:hover {
-  text-decoration: underline;
+.theme-toggle__btn+.theme-toggle__btn {
+  border-left: 1px solid var(--border);
+}
+
+.theme-toggle__btn:hover {
+  color: var(--fg);
+}
+
+.theme-toggle__btn[aria-pressed="true"] {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--bg) 88%, var(--muted));
+}
+
+.theme-toggle__btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: -2px;
+}
+
+.theme-toggle__btn svg {
+  display: block;
+  width: 1em;
+  height: 1em;
 }
 
 .portfolios {
@@ -817,7 +856,10 @@ body.lightbox-open {
   .theme-toggle {
     top: 18px;
     right: 18px;
-    padding: 4px 6px;
+  }
+
+  .theme-toggle__btn {
+    padding: 5px 7px;
   }
 }
 

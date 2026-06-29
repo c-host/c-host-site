@@ -23,26 +23,82 @@
     }
   };
 
-  const updateToggleLabel = (button, theme) => {
-    button.textContent = theme === "dark" ? "Light" : "Dark";
-    button.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
-    button.setAttribute("title", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
+  const iconSvg = (paths) => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.75");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    for (const d of paths) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", d.tag);
+      if (d.d) el.setAttribute("d", d.d);
+      if (d.cx) el.setAttribute("cx", d.cx);
+      if (d.cy) el.setAttribute("cy", d.cy);
+      if (d.r) el.setAttribute("r", d.r);
+      svg.appendChild(el);
+    }
+    return svg;
   };
 
-  const toggle = document.createElement("button");
-  toggle.type = "button";
-  toggle.className = "theme-toggle";
+  const THEME_ICONS = {
+    light: iconSvg([
+      { tag: "circle", cx: "12", cy: "12", r: "4" },
+      { tag: "path", d: "M12 2v2" },
+      { tag: "path", d: "M12 20v2" },
+      { tag: "path", d: "M4.93 4.93l1.41 1.41" },
+      { tag: "path", d: "M17.66 17.66l1.41 1.41" },
+      { tag: "path", d: "M2 12h2" },
+      { tag: "path", d: "M20 12h2" },
+      { tag: "path", d: "M4.93 19.07l1.41-1.41" },
+      { tag: "path", d: "M17.66 6.34l1.41-1.41" },
+    ]),
+    dark: iconSvg([{ tag: "path", d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" }]),
+  };
+
+  const updateThemeToggle = (group, theme) => {
+    for (const button of group.querySelectorAll("[data-theme-choice]")) {
+      const choice = button.getAttribute("data-theme-choice");
+      const active = choice === theme;
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+      button.tabIndex = active ? -1 : 0;
+    }
+  };
+
+  const themeToggle = document.createElement("div");
+  themeToggle.className = "theme-toggle";
+  themeToggle.setAttribute("role", "group");
+  themeToggle.setAttribute("aria-label", "Color theme");
+
+  const makeThemeButton = (choice, label) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "theme-toggle__btn";
+    button.setAttribute("data-theme-choice", choice);
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+    button.appendChild(THEME_ICONS[choice].cloneNode(true));
+    button.addEventListener("click", () => {
+      writeTheme(choice);
+      updateThemeToggle(themeToggle, choice);
+    });
+    return button;
+  };
+
+  themeToggle.append(makeThemeButton("light", "Light"), makeThemeButton("dark", "Dark"));
+
   const initialTheme = readTheme();
   writeTheme(initialTheme);
-  updateToggleLabel(toggle, initialTheme);
-  toggle.addEventListener("click", () => {
-    const current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
-    const next = current === "dark" ? "light" : "dark";
-    writeTheme(next);
-    updateToggleLabel(toggle, next);
-  });
+  updateThemeToggle(themeToggle, initialTheme);
   const wrap = document.querySelector(".wrap");
-  (wrap || document.body).appendChild(toggle);
+  (wrap || document.body).appendChild(themeToggle);
+
+  for (const glyph of document.querySelectorAll(".glyph")) {
+    glyph.setAttribute("aria-hidden", "true");
+  }
 
   const path = (location.pathname || "/").replace(/\/+$/, "/");
   const links = document.querySelectorAll("a[href]");
