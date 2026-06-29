@@ -3,7 +3,6 @@ Thumbs.db
 
 # Local tooling
 .vscode/
-tools/
 
 # Local notes
 content/README.md
